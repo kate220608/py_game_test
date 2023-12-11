@@ -3,7 +3,7 @@ import os
 import sys
 
 pygame.init()
-size = width, height = 800, 600
+size = width, height = 300, 300
 screen = pygame.display.set_mode(size)
 
 
@@ -24,38 +24,40 @@ def load_image(name, colorkey=None):
     return image
 
 
-class Cursor(pygame.sprite.Sprite):
-    image = load_image("arrow.png")
+class Creature(pygame.sprite.Sprite):
+    image = load_image("creature.png")
 
     def __init__(self, *group):
         super().__init__(*group)
-        self.image = Cursor.image
+        self.image = Creature.image
         self.rect = self.image.get_rect()
-        self.rect.x = -100
-        self.rect.y = -100
+        self.rect.x = 0
+        self.rect.y = 0
 
     def update(self, *args):
-        if args and args[0].type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
-            self.rect.x = args[0].pos[0]
-            self.rect.y = args[0].pos[1]
-        if not pygame.mouse.get_focused():
-            self.rect.x = -100
-            self.rect.y = -100
+        if args and args[0].type == pygame.KEYDOWN:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_LEFT]:
+                self.rect.x -= 10
+            elif keys[pygame.K_RIGHT]:
+                self.rect.x += 10
+            elif keys[pygame.K_UP]:
+                self.rect.y -= 10
+            elif keys[pygame.K_DOWN]:
+                self.rect.y += 10
 
 
 all_sprites = pygame.sprite.Group()
-Cursor(all_sprites)
+Creature(all_sprites)
 
 if __name__ == '__main__':
     running = True
-    moving = False
     while running:
-        screen.fill((0, 0, 0))
-        pygame.mouse.set_visible(False)
+        screen.fill((255, 255, 255))
+        all_sprites.draw(screen)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-        all_sprites.draw(screen)
-        all_sprites.update(event)
+            all_sprites.update(event)
         pygame.display.flip()
     pygame.quit()
