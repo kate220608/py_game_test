@@ -1,10 +1,11 @@
 import pygame
 import os
 import sys
+import random
 
 
 pygame.init()
-size = width, height = 600, 95
+size = width, height = 500, 500
 screen = pygame.display.set_mode(size)
 v = 1
 fps = 30
@@ -28,34 +29,28 @@ def load_image(name, colorkey=None):
     return image
 
 
-class Car(pygame.sprite.Sprite):
-    image = load_image("car2.png")
+class Bomb(pygame.sprite.Sprite):
+    image = load_image("bomb.png")
+    image_boom = load_image("boom.png")
 
-    def __init__(self, *group):
-        super().__init__(*group)
-        self.image = Car.image
+    def __init__(self, group):
+        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite.
+        # Это очень важно !!!
+        super().__init__(group)
+        self.image = Bomb.image
         self.rect = self.image.get_rect()
-        self.rect.x = 0
-        self.rect.y = 0
-        self.x = 0
-        self.right_moving = True
+        self.rect.x = random.randrange(width - 50)
+        self.rect.y = random.randrange(height - 51)
 
-    def update(self):
-        if self.right_moving:
-            self.rect = self.rect.move(self.x, 0)
-            self.x += v / fps
-        else:
-            self.rect = self.rect.move(-self.x, 0)
-            self.x -= v / fps
-        clock.tick(fps)
-        if self.rect.x + 150 >= 600:
-            self.right_moving = False
-        if self.rect.x <= 0:
-            self.right_moving = True
+    def update(self, *args):
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+                self.rect.collidepoint(args[0].pos):
+            self.image = self.image_boom
 
 
 all_sprites = pygame.sprite.Group()
-Car(all_sprites)
+for _ in range(20):
+    Bomb(all_sprites)
 
 if __name__ == '__main__':
     running = True
@@ -63,8 +58,8 @@ if __name__ == '__main__':
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-        screen.fill((255, 255, 255))
+            all_sprites.update(event)
+        screen.fill((0, 0, 0))
         all_sprites.draw(screen)
-        all_sprites.update()
         pygame.display.flip()
     pygame.quit()
