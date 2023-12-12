@@ -2,9 +2,13 @@ import pygame
 import os
 import sys
 
+
 pygame.init()
-size = width, height = 300, 300
+size = width, height = 600, 95
 screen = pygame.display.set_mode(size)
+v = 1
+fps = 30
+clock = pygame.time.Clock()
 
 
 def load_image(name, colorkey=None):
@@ -24,40 +28,43 @@ def load_image(name, colorkey=None):
     return image
 
 
-class Creature(pygame.sprite.Sprite):
-    image = load_image("creature.png")
+class Car(pygame.sprite.Sprite):
+    image = load_image("car2.png")
 
     def __init__(self, *group):
         super().__init__(*group)
-        self.image = Creature.image
+        self.image = Car.image
         self.rect = self.image.get_rect()
         self.rect.x = 0
         self.rect.y = 0
+        self.x = 0
+        self.right_moving = True
 
-    def update(self, *args):
-        if args and args[0].type == pygame.KEYDOWN:
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_LEFT]:
-                self.rect.x -= 10
-            elif keys[pygame.K_RIGHT]:
-                self.rect.x += 10
-            elif keys[pygame.K_UP]:
-                self.rect.y -= 10
-            elif keys[pygame.K_DOWN]:
-                self.rect.y += 10
+    def update(self):
+        if self.right_moving:
+            self.rect = self.rect.move(self.x, 0)
+            self.x += v / fps
+        else:
+            self.rect = self.rect.move(-self.x, 0)
+            self.x -= v / fps
+        clock.tick(fps)
+        if self.rect.x + 150 >= 600:
+            self.right_moving = False
+        if self.rect.x <= 0:
+            self.right_moving = True
 
 
 all_sprites = pygame.sprite.Group()
-Creature(all_sprites)
+Car(all_sprites)
 
 if __name__ == '__main__':
     running = True
     while running:
-        screen.fill((255, 255, 255))
-        all_sprites.draw(screen)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            all_sprites.update(event)
+        screen.fill((255, 255, 255))
+        all_sprites.draw(screen)
+        all_sprites.update()
         pygame.display.flip()
     pygame.quit()
